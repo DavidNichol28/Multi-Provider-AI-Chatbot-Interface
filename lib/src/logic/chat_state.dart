@@ -1,0 +1,193 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:flutter/material.dart';
+import 'conversation.dart';
+import 'local_memory_service.dart';
+
+class ChatState {
+  final List<Conversation> allConversations;
+  final int currentConversationIndex;
+  final bool isConversationHistoryVisible;
+  final bool isInitialized;
+
+  const ChatState({
+    required this.allConversations,
+    required this.currentConversationIndex,
+    required this.isConversationHistoryVisible,
+    required this.isInitialized,
+});
+
+  Future<ChatState> copyWith({
+      List<Conversation>? allConversations,
+      int? currentConversationIndex,
+    bool? isConversationHistoryVisible,
+    List<Message>? currentMessages,
+    bool? isInitialized,
+}) async {
+    return ChatState(
+      allConversations: allConversations ?? this.allConversations,
+      currentConversationIndex:
+          currentConversationIndex ?? this.currentConversationIndex,
+      isConversationHistoryVisible:
+          isConversationHistoryVisible ?? this.isConversationHistoryVisible,
+          isInitialized: isInitialized ?? this.isInitialized,
+        );
+  }
+}
+
+class ChatStateNotifier extends StateNotifier<ChatState> {
+  ChatStateNotifier()
+  : super(ChatState(
+      allConversations: [],
+      currentConversationIndex: 0,
+      isConversationHistoryVisible: true,
+      isInitialized: false,
+  )) {
+    _loadConversations();
+  }
+  // Load conversations from LocalMemoryService
+  Future<void> _loadConversations() async {
+    LocalMemoryService memoryService = LocalMemoryService();
+    final conversations = await memoryService.getConversations();
+    
+    // Set the loaded conversations into the state
+    state = await state.copyWith(
+      allConversations: conversations,
+      isInitialized: true, // Mark as initialized after loading data
+    );
+  }
+  
+  // Add a new conversation
+  Future<void> addConversation(String title,
+  ) async {
+    LocalMemoryService memoryService = LocalMemoryService();
+    final newConversation = Conversation(
+      id: DateTime.now().toIso8601String(),
+      title: title,
+      messages: [],
+    );
+    
+    state = await state.copyWith(
+      allConversations: [newConversation, ...state.allConversations],
+      currentConversationIndex: 0,
+      currentMessages: [],
+    );
+    
+    memoryService.addConversation(newConversation);
+  }
+  
+  // Add a message to the current conversation
+  Future<void> addMessageToCurrentConversation(
+    String message, bool isUserMessage, ) async {
+    if (state.currentConversationIndex == -1) {
+      addConversation(
+        "New Conversation",
+      );
+      switchConversation(0);
+    }
+    LocalMemoryService memoryService = LocalMemoryService();
+    
+    
+    // Get Conversations
+    final updatedConversations = [...state.allConversations];
+      // Get current conversation
+      final currentConversation =
+      updatedConversations[state.currentConversationIndex];
+      final newMessage = Message(message: message, isUserMessage: isUserMessage);
+      updatedConversations[state.currentConversationIndex] =
+      currentConversation.copyWith(
+        messages: [
+          ...currentConversation.messages,
+          newMessage,
+        ],
+      );
+      
+      state = await state.copyWith(
+        allConversations: updatedConversations,
+      );
+      String currentId =
+      state.allConversations[state.currentConversationIndex].id;
+      
+      memoryService.addMessageToConversation(
+        currentId, Message(message: message, isUserMessage: isUserMessage));
+      
+      
+    }
+    
+    // Change the current conversation
+    void switchConversation(int index) async {
+      if (index < 0 || index >= state.allConversations.length) return;
+      
+      if (state.currentConversationIndex == 0 && state.allConversations[0].messages.isEmpty) {
+        int newIndex = index - 1;
+        List<Conversation> newAllConversations = [...state.allConversations];
+        newAllConversations.removeAt(0);
+        state = await state.copyWith(currentConversationIndex:newIndex, allConversations: newAllConversations);
+        }
+        else {
+          state = await state.copyWith(currentConversationIndex: index);
+        }
+      }
+      
+      // Toggle conversation history visibility
+      void toggleConversationHistoryVisibility() async {
+        state = await state.copyWith(
+          isConversationHistoryVisible: !state.isConversationHistoryVisible,
+        );
+      }
+      
+      // Get messages for the current conversation
+      List<Message> getMessagesForCurrentConversation() {
+        if (state.currentConversationIndex == -1) return [];
+        
+        return state.allConversations[state.currentConversationIndex].messages;
+      }
+      
+      // Delete a conversation
+      void deleteConversation(int index) async {
+        if (index < 0 || index >= state.allConversations.length) return;
+        
+        final updatedConversations = [...state.allConversations];
+        updatedConversations.removeAt(index);
+        
+        final newIndex = index == state.currentConversationIndex
+        ? 0
+        : state.currentConversationIndex == updatedConversations.length
+        ? 0
+        : state.currentConversationIndex;
+        
+        state = await state.copyWith(
+          allConversations: updatedConversations,
+          currentConversationIndex: newIndex,
+        );
+        
+        LocalMemoryService memoryService = LocalMemoryService();
+        memoryService.deleteConversation(index);
+        
+      }
+      void changeConversationTitle(String title) async {
+        print("ChangeConversationTitle: $title");
+        if (state.allConversations[state.currentConversationIndex].title != title) {
+          
+          final updatedConversations = [...state.allConversations];
+          Conversation updatedConversation = updatedConversations[state.currentConversationIndex]; 
+          
+          updatedConversation = updatedConversations[state.currentConversationIndex].copyWith(title: title);
+          updatedConversations[state.currentConversationIndex] = updatedConversation;
+          state = await state.copyWith(
+            allConversations: updatedConversations
+          );
+          
+          LocalMemoryService memoryService = LocalMemoryService();
+          memoryService.updateConversation(updatedConversation);
+        }
+      }
+    }
+    
+    
+    final chatProvider = StateNotifierProvider<ChatStateNotifier, ChatState>((ref) {
+        return ChatStateNotifier();
+    });
+    

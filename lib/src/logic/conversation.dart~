@@ -1,0 +1,88 @@
+import 'ai_company.dart';
+
+class Conversation {
+  final String id;
+  final String title;
+  final List<Message> messages;
+
+  Conversation({
+    required this.id,
+    required this.title,
+    required this.messages,
+  });
+
+  // Convert the conversation to a JSON format for SharedPreferences
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'messages': messages.map((message) => message.toJson()).toList(),
+    };
+  }
+
+  // Convert a JSON format back to a Conversation object
+  factory Conversation.fromJson(Map<String, dynamic> json) {
+    return Conversation(
+      id: json['id'],
+      title: json['title'],
+      messages: (json['messages'] as List)
+          .map((messageJson) => Message.fromJson(messageJson))
+          .toList(),
+    );
+  }
+
+  Conversation copyWith({
+    String? id,
+    String? title,
+    List<Message>? messages,
+  }) {
+    return Conversation(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      messages: messages ?? this.messages,
+    );
+  }
+
+}
+
+class Message {
+  final String message;
+  final bool isUserMessage;
+
+  Message({required this.message, required this.isUserMessage});
+
+  // Convert the message to a JSON format for SharedPreferences
+  Map<String, dynamic> toJson() {
+    return {
+      'message': message,
+      'isUserMessage': isUserMessage,
+    };
+  }
+
+  // Convert a JSON format back to a Message object
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      message: json['message'],
+      isUserMessage: json['isUserMessage'],
+    );
+  }
+
+  // Static method to format the messages for use in an API request body
+  static List<Map<String, dynamic>> content(
+      List<Message> chatHistory, AiCompany aiCompany) {
+    return chatHistory.map((message) {
+      if (aiCompany == AiCompany.anthropic || aiCompany == AiCompany.meta) {
+        return {
+          'role': message.isUserMessage ? 'user' : 'assistant',
+          'content': message.message,
+        };
+      } else if (aiCompany == AiCompany.google) {
+        return {
+          'text': message.message,
+        };
+      } else {
+        throw ArgumentError('Unsupported AI service: $aiCompany');
+      }
+    }).toList();
+  }
+}

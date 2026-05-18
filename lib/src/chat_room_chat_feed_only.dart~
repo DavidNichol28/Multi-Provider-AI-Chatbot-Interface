@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'theme.dart';
+import 'message_bubble.dart';
+import 'logic/chat_state.dart';
+import 'package:modals_and_button_triggers/modals_and_button_triggers.dart';
+
+
+class ChatRoomChatFeed extends ConsumerStatefulWidget {
+  const ChatRoomChatFeed({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<ChatRoomChatFeed> createState() => _ChatRoomChatFeedState();
+}
+
+class _ChatRoomChatFeedState extends ConsumerState<ChatRoomChatFeed> {
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    final chatProviderHandler = ref.watch(chatProvider);
+
+    // Automatically scroll when a new message is added
+    ref.listen<ChatState>(chatProvider, (previous, next) {
+      if (next != previous) {
+        _scrollToBottom();
+      }
+    });
+    if (chatProviderHandler.allConversations.isEmpty) {
+      ref.read(chatProvider.notifier).addConversation("Untitled");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        modalThrower(
+          context,
+          TemplateModalPage(
+            title: "There are Chats",
+            subtitle:
+                "This pops up so the user can be prompted to start a chat for good UX.",
+            additionalWidgets: [
+              Text("Put the input connected to creating a new conversation here"),
+            ],
+          ),
+        );
+      });
+
+      return const Text("No conversations yet");
+    } else {
+      final conversation = chatProviderHandler
+          .allConversations[chatProviderHandler.currentConversationIndex];
+      final messages = conversation.messages;
+
+      return Container(
+        color: ChatRoomTheme.backgroundColor,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            _scrollToBottom();
+            return ListView.builder(
+  controller: _scrollController,
+              shrinkWrap: true,
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[index];
+                return MessageBubble(
+                  isUserMessage: message.isUserMessage,
+                  text: message.message,
+                );
+              },
+            );
+          },
+        ),
+      );
+    }
+
+  }
+@override
+void dispose() {
+  _scrollController.dispose();
+  super.dispose();
+}
+}

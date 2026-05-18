@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+
+class MessageBubble extends StatelessWidget {
+  final String text;
+  final bool isUserMessage;
+  Color? userColor = Colors.blue;
+  Color? otherEntityColor = Colors.grey;
+
+  MessageBubble(
+      {Key? key, required this.text, required this.isUserMessage, this.userColor, this.otherEntityColor})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final bubbleTheme =
+        isUserMessage ? userColor : otherEntityColor;
+
+    return Align(
+      alignment: isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color: bubbleTheme,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(color: Colors.white70)
+        ),
+      ),
+    );
+  }
+}
