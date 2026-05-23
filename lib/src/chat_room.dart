@@ -13,11 +13,11 @@ import 'logic/chat_state.dart';
 
 class ChatRoom extends ConsumerWidget {
   final bool userWantsResponse = true;
-  final Map<String, String> aiNameAndSecrets;
+  final Map<String, String> apiKeys;
 
   ChatRoom({
     Key? key,
-    required this.aiNameAndSecrets,
+    required this.apiKeys,
   }) : super(key: key);
 
   @override

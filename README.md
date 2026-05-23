@@ -2,7 +2,56 @@
 
 A modular Flutter chat application that supports multiple AI providers through a unified service abstraction layer. Built with Riverpod state management and designed for extensibility across different LLM APIs.
 
-Currently stable with **Anthropic (Claude)** working. Google Gemini and Meta providers are present but may require API updates.
+Currently stable with **Anthropic (Claude)** and **Google (Gemini)** working.
+
+---
+
+## Basic Usage
+
+Create a `.env` file:
+
+```env
+GOOGLE=your_google_api_key
+ANTHROPIC=your_anthropic_api_key
+```
+
+Then create your app:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:chat_room/chat_room.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
+
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'ChatRoom Demo',
+      home: ChatRoom(
+        apiKeys: {
+          "Google": dotenv.env['GOOGLE'] ?? '',
+          "Anthropic": dotenv.env['ANTHROPIC'] ?? '',
+        },
+      ),
+    );
+  }
+}
+```
 
 ---
 
@@ -10,8 +59,7 @@ Currently stable with **Anthropic (Claude)** working. Google Gemini and Meta pro
 
 - Multi-provider AI support (architecture ready for):
   - Anthropic (Claude) ✅
-  - Google Gemini ⚠️ (API may need update)
-  - Meta LLaMA ⚠️ (not fully configured)
+  - Google Gemini ✅
 - Unified AI service interface (`AiService`)
 - Provider routing via enum-based system (`AiCompany`)
 - Conversation management with persistence
@@ -79,14 +127,13 @@ All logic is centralized in:
 - `_buildRequestBody()`
 
 ---
-
 ## Current Provider Status
 
-| Provider     | Status | Notes |
-|--------------|--------|------|
-| Anthropic    | ✅     | Fully working (Claude 3.5 Sonnet) |
-| Google       | ⚠️     | Requires API compatibility update |
-| Meta         | ⚠️     | Placeholder endpoint / model config incomplete |
+| Provider         | Status | Notes                    |
+| ---------------- | ------ | ------------------------ |
+| Anthropic Claude | ✅      | Working                  |
+| Google Gemini    | ✅      | Working                  |
+
 
 ---
 
