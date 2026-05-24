@@ -1,7 +1,7 @@
 name: chat_room
 description: "A package that can be imported with some API keys and be a fully functioning chatroom with multiple endpoints."
-version: 0.0.1
-homepage:
+version: 1.0.0
+homepage: https://github.com/DavidNichol28/Multi-Provider-AI-Chatbot-Interface
 
 environment:
   sdk: ^3.5.3
