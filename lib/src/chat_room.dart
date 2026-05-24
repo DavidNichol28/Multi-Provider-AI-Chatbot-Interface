@@ -10,28 +10,43 @@ import 'logic/ai_state.dart';
 import 'logic/ai_company.dart';
 import 'logic/chat_state.dart';
 
-
-class ChatRoom extends ConsumerWidget {
-  final bool userWantsResponse = true;
+class ChatRoom extends ConsumerStatefulWidget {
   final Map<String, String> apiKeys;
-
-  ChatRoom({
-    Key? key,
-    required this.apiKeys,
-  }) : super(key: key);
+  final bool userWantsResponse = true;
+  const ChatRoom({super.key, required this.apiKeys});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatRoom> createState() => _ChatRoomState();
+}
+
+class _ChatRoomState extends ConsumerState<ChatRoom> {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(aiProvider.notifier).initializeKeys(widget.apiKeys);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final aiState = ref.watch(aiProvider);
+
     void onSendHandler(String data) async {
       await ref.read(chatProvider.notifier).addMessageToCurrentConversation(
             data,
             true,
           );
 
-      if (userWantsResponse == true) {
+      if (widget.userWantsResponse == true) {
         final aiState = ref.read(aiProvider);
 
 final currentService = aiState.currentService;
+
+if (currentService == null) {
+  return;
+}
 
 String response = await currentService.sendHandler(
   ref
@@ -79,6 +94,7 @@ await ref
           editOption: (string) => handleTheEdit(string),
           deleteOption: () => handleTheDeletion(conversation.key),
       )).toList();
+
     return LayoutBuilder(builder: (context, constraints) {
       final height = constraints.maxHeight;
 

@@ -1,5 +1,3 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ai_service.dart';
 import 'ai_company.dart';
@@ -8,7 +6,7 @@ import 'ai_company.dart';
 final aiProvider =
     StateNotifierProvider<AiNotifier, AiState>((ref) {
   return AiNotifier(
-    availableServices: AiNotifier.initializeServices(),
+    availableServices: [],
   );
 });
 // The list of available AI services
@@ -23,8 +21,14 @@ class AiState {
   });
 
   // Helper to get the currently selected service
-  AiService get currentService => availableServices
-      .firstWhere((service) => service.aiCompany == selectedService);
+AiService? get currentService {
+  try {
+      return availableServices.firstWhere((service) => service.aiCompany == selectedService);
+
+ } catch (_) {
+    return null;
+  }
+  }
 
   AiState copyWith({
     List<AiService>? availableServices,
@@ -44,36 +48,6 @@ class AiState {
             AiState(availableServices: availableServices, selectedService: AiCompany.anthropic,),
           );
 AiCompany get selectedCompany => state.selectedService;
-        static List<AiService> initializeServices() {
-    List<AiService> returnList = [];
-    
-    String? googleKey = dotenv.env['GOOGLE'];
-    if (googleKey != null) {
-
-      returnList.add(
-      AiService(
-      keyForService: googleKey,
-      aiCompany: AiCompany.google,
-      model: 'gemini-2.5-flash',
-      maxTokens: 512,
-  ));
-  
-    }
-
-    String? anthropicKey = dotenv.env['ANTHROPIC'];
-    if (anthropicKey != null) {
-      returnList.add(
-        AiService(
-          keyForService: anthropicKey,
-          aiCompany: AiCompany.anthropic,
-          model: 'claude-sonnet-4-6',
-          maxTokens: 512,
-        )
-      );
-    }
-
-    return returnList;
-  }
 
   static AiCompany _mapNameToEnum(String name) {
     switch (name) {
@@ -85,7 +59,41 @@ AiCompany get selectedCompany => state.selectedService;
       throw ArgumentError('Unknown AI Service: $name');
     }
   }
-  
+  void initializeKeys(Map<String, String> apiKeys) {
+
+  List<AiService> newServices = [];
+
+  final googleKey = apiKeys["Google"];
+  if (googleKey != null && googleKey.isNotEmpty) {
+    newServices.add(
+      AiService(
+        keyForService: googleKey,
+        aiCompany: AiCompany.google,
+        model: 'gemini-2.5-flash',
+        maxTokens: 512,
+      ),
+    );
+  }
+
+  final anthropicKey = apiKeys["Anthropic"];
+  if (anthropicKey != null && anthropicKey.isNotEmpty) {
+    newServices.add(
+      AiService(
+        keyForService: anthropicKey,
+        aiCompany: AiCompany.anthropic,
+        model: 'claude-sonnet-4-6',
+        maxTokens: 512,
+      ),
+    );
+  }
+
+  if (newServices.isNotEmpty) {
+    state = state.copyWith(
+      availableServices: newServices,
+      selectedService: newServices.first.aiCompany,
+    );
+  }
+}
 
   void selectService(AiCompany service) {
     state = state.copyWith(selectedService: service);
@@ -97,10 +105,22 @@ AiCompany get selectedCompany => state.selectedService;
     }).toList();
     state = state.copyWith(availableServices: updatedList);
   }
+void updateCurrentService(String key, dynamic value) {
+  final currentService = state.currentService;
 
-  void updateCurrentService(String key, dynamic value) {
-    final currentService = state.currentService;
-    final updatedService = currentService.copyWithValue(key: key, value: value);
-    updateService(currentService.aiCompany, updatedService);
+  if (currentService == null) {
+    return;
   }
+
+  final updatedService =
+      currentService.copyWithValue(
+        key: key,
+        value: value,
+      );
+
+  updateService(
+    currentService.aiCompany,
+    updatedService,
+  );
+}
 }

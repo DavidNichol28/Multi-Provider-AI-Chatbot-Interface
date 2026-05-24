@@ -1,4 +1,5 @@
 # Chat Room (Multi-AI Provider Flutter App)
+![pub package](https://img.shields.io/pub/v/chat_room.svg)
 
 A modular Flutter chat application that supports multiple AI providers through a unified service abstraction layer. Built with Riverpod state management and designed for extensibility across different LLM APIs.
 

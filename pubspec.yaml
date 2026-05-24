@@ -1,5 +1,5 @@
 name: chat_room
-description: "A new Flutter package project."
+description: "A package that can be imported with some API keys and be a fully functioning chatroom with multiple endpoints."
 version: 0.0.1
 homepage:
 
