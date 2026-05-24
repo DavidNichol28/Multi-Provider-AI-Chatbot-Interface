@@ -27,17 +27,12 @@ class AiService {
   });
 
   Future<String> sendHandler(List<Message> chatHistory) async {
-    print("keyForService: $keyForService");
-    if (keyForService == null || keyForService == '') {
-      throw ArgumentError('API key is missing for the selected AI service.');
-    }
 
     final url = aiCompany == AiCompany.google
         ? '${aiCompany.url}/$model:generateContent?key=$keyForService'
         : aiCompany.url;
     // Build request dynamically based on service
     final requestBody = _buildRequestBody(chatHistory);
-    print("REQUESTBODY: $requestBody");
     final response = await http.post(
       Uri.parse(url),
       headers: aiCompany.headers(keyForService),
@@ -47,7 +42,6 @@ class AiService {
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
 
-      print("responseData $responseData");
       if (aiCompany == AiCompany.google) {
         return responseData['candidates']
                 ?.first['content']['parts']
@@ -144,8 +138,6 @@ class AiService {
         };
 
 
-      default:
-        throw UnimplementedError('AI Service not implemented');
     }
   }
 }

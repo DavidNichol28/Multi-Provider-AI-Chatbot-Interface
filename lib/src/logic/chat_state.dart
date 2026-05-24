@@ -1,8 +1,5 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:flutter/material.dart';
 import 'conversation.dart';
 import 'local_memory_service.dart';
 
@@ -168,7 +165,6 @@ class ChatStateNotifier extends StateNotifier<ChatState> {
         
       }
       void changeConversationTitle(String title) async {
-        print("ChangeConversationTitle: $title");
         if (state.allConversations[state.currentConversationIndex].title != title) {
           
           final updatedConversations = [...state.allConversations];

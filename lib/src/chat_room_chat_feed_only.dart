@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'theme.dart';
 import 'message_bubble.dart';
 import 'logic/chat_state.dart';
-import 'package:modals_and_button_triggers/modals_and_button_triggers.dart';
 
 
 class ChatRoomChatFeed extends ConsumerStatefulWidget {

@@ -12,17 +12,14 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.0.0
   flutter_lints: ^5.0.0
-  modals_and_button_triggers:
-    path: /home/arst/DavidNichol/Modules/Flutter/modules/modals_and_button_triggers
-  personal_input_handler:
-    path: /home/arst/DavidNichol/Modules/Flutter/modules/personalized_widget_handlers/personal_input_handler
-  personal_list_handler:
-    path: /home/arst/DavidNichol/Modules/Flutter/modules/personalized_widget_handlers/personal_list_handler
+
+
+  nichol_ui_lib_modals_and_button_triggers: ^0.0.1
+  nichol_ui_lib_input_handler: ^0.0.1
+  nichol_ui_lib_list_handler: ^0.0.1
   shared_preferences: ^2.3.3
   http: ^1.2.2
   flutter_dotenv: ^5.2.1
-  personal_nav_bar:
-    path: /home/arst/DavidNichol/Modules/Flutter/modules/personalized_widget_handlers/personal_nav_bar
 
 dev_dependencies:
   flutter_test:

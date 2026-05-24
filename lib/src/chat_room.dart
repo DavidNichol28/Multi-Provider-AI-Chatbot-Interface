@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:personal_input_handler/personal_input_handler.dart';
+import 'package:nichol_ui_lib_input_handler/nichol_ui_lib_input_handler.dart';
 import './custom_navbar.dart';
-import 'package:modals_and_button_triggers/modals_and_button_triggers.dart';
-import 'package:personal_list_handler/personal_list_handler.dart';
+import 'package:nichol_ui_lib_modals_and_button_triggers/nichol_ui_lib_modals_and_button_triggers.dart';
+import 'package:nichol_ui_lib_list_handler/nichol_ui_lib_list_handler.dart';
 import 'theme.dart';
 import 'chat_room_chat_feed_only.dart';
 import 'logic/ai_state.dart';
@@ -70,7 +70,7 @@ await ref
       }
                         
 
-      List<PersonalListItem> activeConversations = conversations.asMap().entries.map((conversation) => PersonalListItem(
+      List<NicholUILibListItem> activeConversations = conversations.asMap().entries.map((conversation) => NicholUILibListItem(
           key: ValueKey(conversation.key),
           title: conversation.value.title,
           iteration: conversation.key,
@@ -80,7 +80,6 @@ await ref
           deleteOption: () => handleTheDeletion(conversation.key),
       )).toList();
     return LayoutBuilder(builder: (context, constraints) {
-      final width = MediaQuery.of(context).size.width;
       final height = constraints.maxHeight;
 
       return Scaffold(
@@ -88,17 +87,17 @@ await ref
               navBarTitleWidget: Text("Language Learning Partner"),
               backgroundColor: ChatRoomTheme.navBarColor,
               navBarWidgets:[
-                ModalToggleButtonWithTemplateModalPage(
+                NicholUILibModalToggleButtonWithTemplateModalPage(
                   modalTitle:"Enter name of new conversation",
                   buttonText: "Create Conversation",
                   modalOnSubmit: createConversation,
                 ),
-              ModalToggleButtonWithCustomModalPage(
+              NicholUILibModalToggleButtonWithCustomModalPage(
                  key: ValueKey(conversations.length),
                  modalPage: Container(
                     color: Colors.blue,
                   
-                 child: PersonalListHandler(
+                 child: NicholUILibListHandler(
                      key: ValueKey(ref.watch(chatProvider).allConversations.length),
                       selectedListItem: ref.watch(chatProvider).currentConversationIndex,
                       listItems: activeConversations,
@@ -140,7 +139,7 @@ await ref
                 child: Scaffold(
                   body: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: PersonalInputHandler(
+                    child: NicholUILibInputHandler(
                       onSend: onSendHandler,
                     ),
                   ),
