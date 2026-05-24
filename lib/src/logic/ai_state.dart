@@ -1,14 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ai_service.dart';
 import 'ai_company.dart';
-// Correct the provider to use StateNotifierProvider
-// Define a FutureProvider for AiNotifier
+
 final aiProvider =
-    StateNotifierProvider<AiNotifier, AiState>((ref) {
-  return AiNotifier(
-    availableServices: [],
-  );
-});
+    StateNotifierProvider.family<AiNotifier, AiState, Map<String, String>>(
+  (ref, apiKeys) {
+    final services = AiNotifier.buildServices(apiKeys);
+    return AiNotifier(availableServices: services);
+  },
+);
+
+
 // The list of available AI services
 // AiState to manage the selected service and its data
 class AiState {
@@ -59,13 +61,15 @@ AiCompany get selectedCompany => state.selectedService;
       throw ArgumentError('Unknown AI Service: $name');
     }
   }
-  void initializeKeys(Map<String, String> apiKeys) {
 
-  List<AiService> newServices = [];
+
+
+static List<AiService> buildServices(Map<String, String> apiKeys) {
+  final services = <AiService>[];
 
   final googleKey = apiKeys["Google"];
   if (googleKey != null && googleKey.isNotEmpty) {
-    newServices.add(
+    services.add(
       AiService(
         keyForService: googleKey,
         aiCompany: AiCompany.google,
@@ -77,7 +81,7 @@ AiCompany get selectedCompany => state.selectedService;
 
   final anthropicKey = apiKeys["Anthropic"];
   if (anthropicKey != null && anthropicKey.isNotEmpty) {
-    newServices.add(
+    services.add(
       AiService(
         keyForService: anthropicKey,
         aiCompany: AiCompany.anthropic,
@@ -87,13 +91,16 @@ AiCompany get selectedCompany => state.selectedService;
     );
   }
 
-  if (newServices.isNotEmpty) {
-    state = state.copyWith(
-      availableServices: newServices,
-      selectedService: newServices.first.aiCompany,
-    );
-  }
+  return services;
 }
+
+
+
+
+
+
+
+
 
   void selectService(AiCompany service) {
     state = state.copyWith(selectedService: service);

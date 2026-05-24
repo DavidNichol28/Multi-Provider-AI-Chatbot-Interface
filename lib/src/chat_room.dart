@@ -22,16 +22,8 @@ class ChatRoom extends ConsumerStatefulWidget {
 class _ChatRoomState extends ConsumerState<ChatRoom> {
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(aiProvider.notifier).initializeKeys(widget.apiKeys);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final aiState = ref.watch(aiProvider);
+    final aiState = ref.watch(aiProvider(widget.apiKeys));
 
     void onSendHandler(String data) async {
       await ref.read(chatProvider.notifier).addMessageToCurrentConversation(
@@ -40,7 +32,7 @@ class _ChatRoomState extends ConsumerState<ChatRoom> {
           );
 
       if (widget.userWantsResponse == true) {
-        final aiState = ref.read(aiProvider);
+        final aiState = ref.watch(aiProvider(widget.apiKeys));
 
 final currentService = aiState.currentService;
 
@@ -122,23 +114,23 @@ await ref
                   
                 ),
                 DropdownButton<AiCompany>(
-  value: ref.watch(aiProvider).selectedService,
-  items: AiCompany.values.map((company) {
-    return DropdownMenuItem(
-      value: company,
-      child: Text(company.displayName),
-    );
-  }).toList(),
-  onChanged: (value) {
-    if (value != null) {
-      ref.read(aiProvider.notifier).selectService(value);
-    }
-  },
-)
-             ],
-
-                  initialSubNavTitle: ref.watch(chatProvider).allConversations.length > 0 ? ref.watch(chatProvider).allConversations[ref.read(chatProvider).currentConversationIndex].title : "No Chats",
-                  subNavTitleOnSave: ref.read(chatProvider.notifier).changeConversationTitle,
+                  value: ref.watch(aiProvider(widget.apiKeys)).selectedService,
+                  items: AiCompany.values.map((company) {
+                      return DropdownMenuItem(
+                        value: company,
+                        child: Text(company.displayName),
+                      );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref.read(aiProvider(widget.apiKeys).notifier).selectService(value);
+                    }
+                  },
+                )
+              ],
+              
+              initialSubNavTitle: ref.watch(chatProvider).allConversations.length > 0 ? ref.watch(chatProvider).allConversations[ref.read(chatProvider).currentConversationIndex].title : "No Chats",
+              subNavTitleOnSave: ref.read(chatProvider.notifier).changeConversationTitle,
             ),
 
 
