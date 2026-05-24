@@ -6,6 +6,7 @@ A modular Flutter chat application that supports multiple AI providers through a
 ---
 
 ![target](https://img.shields.io/badge/runtime-local%20%2F%20hardware-blue)
+
 ⚠️ Runtime Target: Local / Hardware-Only Application
 
 This project is designed to run on local hardware environments (Linux desktop / device-bound execution).
