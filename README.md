@@ -13,7 +13,7 @@ This project is designed to run on local hardware environments (Linux desktop / 
 
 It is NOT intended for browser-based deployment due to direct client-side API usage and lack of CORS support from upstream AI providers.
 
-A web-based demonstration layer is available here:
+A desktop-based demonstration layer is available here (probably works on mobile - not web:
 → [ChatRoom Demo Repository](<https://github.com/DavidNichol28/DEMO-FOR-Multi-Provider-AI-Chatbot-Interface>)
 
 Currently stable with **Anthropic (Claude)** and **Google (Gemini)** working.
